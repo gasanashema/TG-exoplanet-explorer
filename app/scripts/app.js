@@ -1,10 +1,10 @@
 /*
 Instructions:
-(1) Get the planet data and add the search header.
-(2) Create the first thumbnail with createPlanetThumb(data)
-(3) Handle errors!
-  (a) Pass 'unknown' to the search header.
-  (b) console.log the error.
+(1) Refactor .forEach below to create a sequence of Promises that always resolves in the same
+    order it was created.
+  (a) Fetch each planet's JSON from the array of URLs in the search results.
+  (b) Call createPlanetThumb on each planet's response data to add it to the page.
+(2) Use developer tools to determine if the planets are being fetched in series or in parallel.
  */
 
 // Inline configuration for jshint below. Prevents `gulp jshint` from failing with quiz starter code.
@@ -28,7 +28,7 @@ Instructions:
    * @param  {Object} data - The raw data describing the planet.
    */
   function createPlanetThumb(data) {
-    var pT = document.createElement('planet-thumb');
+    var pT = document.createElement("planet-thumb");
     for (var d in data) {
       pT[d] = data[d];
     }
@@ -36,13 +36,13 @@ Instructions:
   }
 
   /**
-   * XHR wrapped in a promise
+   * XHR wrapped in a promise.
    * @param  {String} url - The URL to fetch.
    * @return {Promise}    - A Promise that resolves when the XHR succeeds and fails otherwise.
    */
   function get(url) {
     return fetch(url, {
-      method: 'get'
+      method: "get",
     });
   }
 
@@ -52,7 +52,7 @@ Instructions:
    * @return {Promise}    - A promise that passes the parsed JSON response.
    */
   function getJSON(url) {
-    return get(url).then(function(response) {
+    return get(url).then(function (response) {
       return response.json();
     });
   }
@@ -60,13 +60,15 @@ Instructions:
   window.addEventListener("WebComponentsReady", function () {
     home = document.querySelector('section[data-route="home"]');
     /*
-    Uncomment the next line and start here when you're ready to add the first thumbnail!
-
-    Your code goes here!
+    Refactor this code!
      */
+    let resolved = Promise.resolve();
     getJSON("../data/earth-like-results.json")
-      .then(res =>{ addSearchHeader(res.query); return getJSON(res.results[0])})
-      .then(createPlanetThumb)
-      .catch(err => addSearchHeader("Unknown - " + err));
+    resolved.then((response) =>
+        response.results.forEach((url) =>
+          getJSON(url).then(createPlanetThumb)
+        )
+      )
+      .catch((e) => console.log(e));
   });
 })(document);
