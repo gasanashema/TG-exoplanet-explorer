@@ -62,13 +62,8 @@ Instructions:
     /*
     Refactor this code!
      */
-    let resolved = Promise.resolve();
-    getJSON("../data/earth-like-results.json")
-    resolved.then((response) =>
-        response.results.forEach((url) =>
-          getJSON(url).then(createPlanetThumb)
-        )
-      )
-      .catch((e) => console.log(e));
+    getJSON("../data/earth-like-results.json").then((res) =>
+      res.results.forEach((el) => getJSON(el).then(createPlanetThumb))
+    );
   });
 })(document);
